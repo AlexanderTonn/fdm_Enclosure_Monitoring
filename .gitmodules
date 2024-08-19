@@ -1,0 +1,6 @@
+[submodule "mega2560/lib/Arduino_IOclass"]
+	path = mega2560/lib/Arduino_IOclass
+	url = https://github.com/AlexanderTonn/Arduino_IOclass.git
+[submodule "mega2560/lib/EasyNextionLibrary"]
+	path = mega2560/lib/EasyNextionLibrary
+	url = https://github.com/Seithan/EasyNextionLibrary.git

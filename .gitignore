@@ -32,6 +32,6 @@
 *.app
 
 # Platform IO
-*.pio
+*mega2560/.pio/
 
-*.vscode
+*.vscode/
