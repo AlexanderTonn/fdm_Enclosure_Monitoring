@@ -8,13 +8,22 @@
 class dhtSensor
 {
     public:
-        dhtSensor() : mDht(DHTPIN, DHTTYPE) {};
-        auto init() -> void;
-        auto readHumidity() -> void;
-        auto readTemperature() -> void;
-
+        dhtSensor(uint8_t pin, uint8_t mode);
+    
     private:
+        uint8_t mPin;
+        uint8_t mMode;
         DHT mDht;
+
+    public:
+        auto start() -> void;
+        bool mIsStarted = false; // flag to check if the sensor has been started
+
+    public:    
+        auto getHumidity() -> float;
+        auto getTemperature() -> float;
+
+
 
 };
 

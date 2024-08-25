@@ -18,10 +18,10 @@
   "connections": [
     [ "dht1:VCC", "mega:5V.2", "red", [ "v182.4", "h345.6" ] ],
     [ "dht2:VCC", "mega:5V.2", "red", [ "v182.4", "h134.4" ] ],
-    [ "dht1:SDA", "mega:20", "green", [ "v172.8", "h278.5" ] ],
     [ "dht1:GND", "mega:GND.1", "black", [ "v163.2", "h57.6" ] ],
-    [ "dht2:SDA", "mega:20", "green", [ "v163.2", "h86.5" ] ],
-    [ "dht2:GND", "mega:GND.1", "black", [ "v163.2", "h-144" ] ]
+    [ "dht2:GND", "mega:GND.1", "black", [ "v163.2", "h-144" ] ],
+    [ "dht1:SDA", "mega:2", "green", [ "v201.6", "h192.1" ] ],
+    [ "dht2:SDA", "mega:3", "green", [ "v192", "h-19.1" ] ]
   ],
   "dependencies": {}
 }
