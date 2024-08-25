@@ -7,7 +7,15 @@
 
 class dhtSensor
 {
-    
+    public:
+        dhtSensor() : mDht(DHTPIN, DHTTYPE) {};
+        auto init() -> void;
+        auto readHumidity() -> void;
+        auto readTemperature() -> void;
+
+    private:
+        DHT mDht;
+
 };
 
 #endif // SENSOR_DHT_HPP
