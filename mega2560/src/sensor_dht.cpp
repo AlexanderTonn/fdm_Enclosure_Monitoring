@@ -16,6 +16,7 @@ auto dhtSensor::start() -> void
 
     mDht.begin();
     mIsStarted = true;
+    Serial.println(String(millis()) + String(" DHT Sensor started on pin: ") + String(mPin));
 }
 /**
  * @brief Get Temperature in Celsius
