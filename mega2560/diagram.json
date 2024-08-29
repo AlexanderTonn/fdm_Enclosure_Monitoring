@@ -3,7 +3,7 @@
   "author": "Anonymous maker",
   "editor": "wokwi",
   "parts": [
-    { "type": "wokwi-arduino-mega", "id": "mega", "top": 135, "left": -51.6, "attrs": {} },
+    { "type": "wokwi-arduino-mega", "id": "mega", "top": 144.6, "left": -42, "attrs": {} },
     { "type": "wokwi-dht22", "id": "dht1", "top": -191.7, "left": -34.2, "attrs": {} },
     { "type": "wokwi-dht22", "id": "dht2", "top": -191.7, "left": 167.4, "attrs": {} },
     {

@@ -4,6 +4,7 @@
 #include "nextionHMI.hpp"
 #include "pinMapping.hpp"
 #include "sensor_dht.hpp"
+#include "logic.hpp"
 
 NextionHMI _hmi;
 IO _io;
@@ -21,11 +22,13 @@ void setup() {
   
   Serial.println(String(millis()) + String(" Serial Started"));
   
-
   _hmi.init(baud);
 
   _io.reservePin(DHT_INDOOR, IO::mode::BUS);
   _io.reservePin(DHT_OUTDOOR, IO::mode::BUS);
+  _io.reservePin(PWM_FAN_INTO, IO::mode::ANALOG_OUT);
+  _io.reservePin(PWM_FAN_OUT, IO::mode::ANALOG_OUT);
+
   _dhtIndoor.start();
   _dhtOutdoor.start();
 }
