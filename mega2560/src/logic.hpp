@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <io.hpp>
 #include <PID_v1.h>
+#include "pinMapping.hpp"
 
 class Logic {
 public:
@@ -16,19 +17,22 @@ public:
     auto loop() -> void;
 
 private:
-    auto controlTemperature() -> void;
     struct pidValues
     {
-        float Kp;
-        float Ki;
-        float Kd;
-        float setpoint;
-        float input;
-        float output;
-    } mPidValues;
+        double Kp = 1.0;
+        double Ki = 0.05;
+        double Kd = 0.25;
+        double setpoint;
+        double input;
+        double output;
+        bool initialized = false; // flag to check if the PID controller has been inizialized
+    } mInletValues, mOutletValues;
 
-    PID mPID(&mPidValues.input, &mPidValues.output, &mPidValues.setpoint, mPidValues.Kp, mPidValues.Ki, mPidValues.Kd, DIRECT);
+    auto fanController(uint16_t, pidValues, PID) -> double;
 
-};
+    PID mInletPID; // PID controller for the inlet fans
+    PID mOutletPID; // PID controller for the outlet fans
+
+}; 
 
 #endif // LOGIC_HPP

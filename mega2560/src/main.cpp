@@ -8,6 +8,7 @@
 
 NextionHMI _hmi;
 IO _io;
+Logic _logic(&_io);
 
 dhtSensor _dhtIndoor(DHT_INDOOR, DHTTYPE); // Object for sensor inside the enclosure
 dhtSensor _dhtOutdoor(DHT_OUTDOOR, DHTTYPE); // Object for sensor outside the enclosure
