@@ -38,7 +38,8 @@ void loop() {
   _io.readAll();
   _io.mRawData[DHT_INDOOR] = static_cast<uint16_t>(_dhtIndoor.getTemperature());
   _io.mRawData[DHT_OUTDOOR] = static_cast<uint16_t>(_dhtOutdoor.getTemperature());
-
+  _logic.loop();
+  
   _hmi.listen();
 
   _io.writeAll();
