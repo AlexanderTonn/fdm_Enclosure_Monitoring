@@ -4,19 +4,25 @@
 #include <Arduino.h>
 #include <io.hpp>
 #include <PID_v1.h>
+
 #include "pinMapping.hpp"
+#include "light.hpp"
+#include "nextionHMI.hpp"
 
 class Logic {
 public:
-    Logic(IO *io);
+    Logic(IO *io, NextionHMI *hmi);
 
 private: 
     IO *mIo;
+    NextionHMI *mHmi;
+    lightController mLight;
 
 public: 
     auto loop() -> void;
 
-private:
+public:
+    // must be public for accessing by hmi class
     struct pidValues
     {
         double Kp = 3.0;
@@ -25,10 +31,13 @@ private:
         double setpoint = 25.0;
         double input;
         double output;
-        bool initialized = false; // flag to check if the PID controller has been inizialized
+        uint16_t sampletime = 100; // sample time in ms
     } mInletValues, mOutletValues;
 
-    auto fanController(uint16_t, pidValues &, PID&) -> uint16_t;
+// functions for fan control
+private:
+    auto fanController(pidValues &, PID&, NextionHMI::hmiSettings::fanControl::speedLimits) -> uint16_t;
+    auto hmiToIntern() -> void;
 
     PID mInletPID; // PID controller for the inlet fans
     PID mOutletPID; // PID controller for the outlet fans

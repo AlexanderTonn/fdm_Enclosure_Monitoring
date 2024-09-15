@@ -9,14 +9,8 @@ class NextionHMI
     public:
     NextionHMI();
     
-    /**
-     * @brief must be called in void loop() to response touch events
-     * 
-     */
-    auto listen() -> void
-    {
-        pEasyNex->NextionListen();
-    }
+    auto loop() -> void;
+
     /**
      * @brief initialize the Nextion HMI
      * @note must be called in void setup()
@@ -27,8 +21,60 @@ class NextionHMI
         pEasyNex->begin(baud);
     }
 
+    public:
+    struct hmiSettings
+    {
+        struct fanControl
+        {
+            bool autoSetpoint = true; // flag to check if the setpoint is set automatically
+            double setpoint = 25.0; // default setpoint for fancontrol
+            struct speedLimits
+            {
+                byte minSpeed = 0; // min speed of the fan in percent
+                byte maxSpeed = 100; // max speed of the fan in percent
+                bool manualMode = false; // manual mode 
+                byte manualSpeed = 40; // default speed in manual mode
+            } SpeedInput, SpeedOutput;
+            struct pidValues
+            {
+                double Kp = 3.0;
+                double Ki = 0.15;
+                double Kd = 0.25;
+                uint16_t sampletime = 100; // sample time in ms
+
+            } pidInput, pidOutput;
+
+        } fanControl;
+        struct lightControl
+        {
+            bool twilightControl = false; // Automatic twilight control if the sun goes down, the light goes on
+            bool manualControl = false; // Manual control of the light
+            bool printDetection = true; // light goes on if a print was started
+            uint8_t intensity = 50; // default light intensity
+            uint8_t twiglightIntensity = 30; // default light intensity for twilight
+            uint8_t twiglightThreshold = 20; // threshold for activating the light if the sun goes down
+        } lightControl;
+    }  mSettings;
+
     private: 
     EasyNex* pEasyNex = nullptr;
+
+
+    private: 
+    auto headerHandler() -> void;
+
+    public:
+    struct hmiHeader
+    {
+        bool fanActive = false; // 0 == off (red), 1 == on (green)
+        bool lightActive = false; // 0 == off (red), 1 == on (green)
+        bool humidityNormal = false; // 0 == normal (green), 1 == to High (red)
+        byte temperatureState = 0; // 0 == normal (green), 1 == warning (yellow), 2 == critical (red)
+        byte fanSpeed = 0; // 0 - 100 % fan speed
+        byte lightIntensity = 0; // 0 - 100 % light intensity
+        byte temperature = 0; // 0 - 100 °C 
+    } mHeader;
+
 };
 
 #endif // NEXTIONHMI_HPP
