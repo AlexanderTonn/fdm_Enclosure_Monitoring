@@ -28,6 +28,8 @@ class NextionHMI
         {
             bool autoSetpoint = true; // flag to check if the setpoint is set automatically
             double setpoint = 25.0; // default setpoint for fancontrol
+            double warn = 30.0; // warning temperature
+            double critical = 35.0; // critical temperature
             struct speedLimits
             {
                 byte minSpeed = 0; // min speed of the fan in percent
@@ -54,6 +56,11 @@ class NextionHMI
             uint8_t twiglightIntensity = 30; // default light intensity for twilight
             uint8_t twiglightThreshold = 20; // threshold for activating the light if the sun goes down
         } lightControl;
+        struct humidityControl
+        {
+            uint8_t humidityWarn = 60; // warning humidity
+            uint8_t humidityCritical = 70; // critical humidity
+        } humidityControl;
     }  mSettings;
 
     private: 
@@ -61,14 +68,18 @@ class NextionHMI
 
 
     private: 
-    auto headerHandler() -> void;
+    auto initSettings() -> void;
+    bool mInitDone = false; 
+
+    auto getSettings() -> void;
+    auto setHeaderData() -> void;
 
     public:
     struct hmiHeader
     {
         bool fanActive = false; // 0 == off (red), 1 == on (green)
         bool lightActive = false; // 0 == off (red), 1 == on (green)
-        bool humidityNormal = false; // 0 == normal (green), 1 == to High (red)
+        bool humidityState = false; // 0 == normal (green), 1 == to High (red)
         byte temperatureState = 0; // 0 == normal (green), 1 == warning (yellow), 2 == critical (red)
         byte fanSpeed = 0; // 0 - 100 % fan speed
         byte lightIntensity = 0; // 0 - 100 % light intensity
