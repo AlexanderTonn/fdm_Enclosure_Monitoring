@@ -21,11 +21,19 @@ auto Logic::loop() -> void
 
     // Load HMI Settings to internal structures
     hmiToIntern();
+    updateHmiData();
+
 
     mIo->mRawData[PWM_FAN_OUT] = fanController(mOutletValues, mOutletPID, mHmi->mSettings.fanControl.SpeedOutput);
     mIo->mRawData[PWM_FAN_INTO] = fanController(mInletValues, mInletPID, mHmi->mSettings.fanControl.SpeedInput);
 
-    mIo->mRawData[PWM_LIGHT] = mLight.adjust(mHmi->mSettings.lightControl.intensity);   
+
+    // Light Control
+    //TODO!: Implement Twilight Control
+    if(mHmi->mSettings.lightControl.manualControl)
+        mIo->mRawData[PWM_LIGHT] = mLight.adjust(mHmi->mSettings.lightControl.intensity);
+    else 
+        mIo->mRawData[PWM_LIGHT] = 0;
 
 }
 /**
@@ -68,4 +76,11 @@ auto Logic::hmiToIntern() -> void
     mOutletValues.Ki = mHmi->mSettings.fanControl.pidOutput.Ki;
     mOutletValues.Kp = mHmi->mSettings.fanControl.pidOutput.Kp;
     mOutletValues.sampletime = mHmi->mSettings.fanControl.pidOutput.sampletime;
+}
+
+auto Logic::updateHmiData() -> void
+{
+    mHmi->mHeader.fanSpeed = mIo->mRawData[PWM_FAN_INTO];
+    mHmi->mHeader.lightIntensity = mIo->mRawData[PWM_LIGHT];
+    mHmi->mHeader.temperature = mIo->mRawData[DHT_INDOOR];
 }

@@ -27,9 +27,9 @@ class NextionHMI
         struct fanControl
         {
             bool autoSetpoint = true; // flag to check if the setpoint is set automatically
-            double setpoint = 25.0; // default setpoint for fancontrol
-            double warn = 30.0; // warning temperature
-            double critical = 35.0; // critical temperature
+            byte setpoint = 25; // default setpoint for fancontrol
+            byte warn = 30; // warning temperature
+            byte critical = 35; // critical temperature
             struct speedLimits
             {
                 byte minSpeed = 0; // min speed of the fan in percent
@@ -39,9 +39,9 @@ class NextionHMI
             } SpeedInput, SpeedOutput;
             struct pidValues
             {
-                double Kp = 3.0;
-                double Ki = 0.15;
-                double Kd = 0.25;
+                float Kp = 3.0;
+                float Ki = 0.15;
+                float Kd = 0.15;
                 uint16_t sampletime = 100; // sample time in ms
 
             } pidInput, pidOutput;

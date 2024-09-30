@@ -38,6 +38,7 @@ public:
 private:
     auto fanController(pidValues &, PID&, NextionHMI::hmiSettings::fanControl::speedLimits) -> uint16_t;
     auto hmiToIntern() -> void;
+    auto updateHmiData() -> void;
 
     PID mInletPID; // PID controller for the inlet fans
     PID mOutletPID; // PID controller for the outlet fans

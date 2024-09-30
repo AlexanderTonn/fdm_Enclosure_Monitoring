@@ -13,13 +13,12 @@ Logic _logic(&_io, &_hmi);
 dhtSensor _dhtIndoor(DHT_INDOOR, DHTTYPE); // Object for sensor inside the enclosure
 dhtSensor _dhtOutdoor(DHT_OUTDOOR, DHTTYPE); // Object for sensor outside the enclosure
 
-constexpr static uint16_t baud PROGMEM = 9600;
+constexpr static uint32_t baud PROGMEM = 57600;
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(baud);
-  while (!Serial)
-    ;
+  delay(5000);
   
   Serial.println(String(millis()) + String(" Serial Started"));
   
