@@ -31,7 +31,10 @@ auto Logic::loop() -> void
     // Light Control
     //TODO!: Implement Twilight Control
     if(mHmi->mSettings.lightControl.manualControl)
-        mIo->mRawData[PWM_LIGHT] = mLight.adjust(mHmi->mHeader.lightIntensity);
+    {
+        mIo->mRawData[PWM_LIGHT] = mLight.adjust(&mHmi->mSettings.lightControl.intensity);
+        mHmi->mHeader.lightIntensity = mHmi->mSettings.lightControl.intensity;
+    }
     else 
         mIo->mRawData[PWM_LIGHT] = 0;
 

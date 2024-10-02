@@ -6,7 +6,7 @@
 class lightController
 {
     public:
-        auto adjust(byte&) -> byte;
+        auto adjust(byte*) -> byte;
 
 };
 

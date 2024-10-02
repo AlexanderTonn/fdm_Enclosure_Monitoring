@@ -37,6 +37,7 @@ auto NextionHMI::setHeaderData() -> void
     // Set states for showing the states
     mHeader.fanActive = (mHeader.fanSpeed > 0) ? 1 : 0;
     mHeader.lightActive = (mHeader.lightIntensity > 0) ? 1 : 0;
+    mHeader.humidityState = (mHeader.humidity > mSettings.humidityControl.humidityCritical) ? 1 : 0;
 
     // Set states for showing the temperature picture
     if (mHeader.temperature < mSettings.fanControl.setpoint)
