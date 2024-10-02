@@ -32,6 +32,7 @@ auto NextionHMI::setHeaderData() -> void
     pEasyNex->writeNum("globalVars.va0.val", mHeader.fanSpeed);
     pEasyNex->writeNum("globalVars.va1.val", mHeader.lightIntensity);
     pEasyNex->writeNum("globalVars.va2.val", mHeader.temperature);
+    pEasyNex->writeNum("globalVars.va6.val", mHeader.humidity);
 
     // Set states for showing the states
     mHeader.fanActive = (mHeader.fanSpeed > 0) ? 1 : 0;
@@ -66,7 +67,7 @@ auto NextionHMI::initSettings() -> void
     pEasyNex->writeNum("lightControl1.n4.val", mSettings.lightControl.twiglightThreshold);
     pEasyNex->writeNum("lightControl1.c0.val", mSettings.lightControl.twilightControl);
     pEasyNex->writeNum("lightControl2.c0.val", mSettings.lightControl.printDetection);
-    pEasyNex->writeNum("lightControl3.c0.val", mSettings.lightControl.printDetection);
+    pEasyNex->writeNum("lightControl3.c0.val", mSettings.lightControl.manualControl);
     pEasyNex->writeNum("lightControl3.h0.val", mSettings.lightControl.intensity);
     
     pEasyNex->writeNum("fanControll1.n4.val", mSettings.fanControl.autoSetpoint);
@@ -101,7 +102,7 @@ auto NextionHMI::getSettings() -> void
     mSettings.lightControl.twiglightThreshold = pEasyNex->readNumber("lightControl1.n4.val");
     mSettings.lightControl.twilightControl = pEasyNex->readNumber("lightControl1.c0.val");
     mSettings.lightControl.printDetection = pEasyNex->readNumber("lightControl2.c0.val");
-    mSettings.lightControl.printDetection = pEasyNex->readNumber("lightControl3.c0.val");
+    mSettings.lightControl.manualControl = pEasyNex->readNumber("lightControl3.c0.val");
     mSettings.lightControl.intensity = pEasyNex->readNumber("lightControl3.h0.val");
 
     mSettings.fanControl.autoSetpoint = pEasyNex->readNumber("fanControl1.c0.val");

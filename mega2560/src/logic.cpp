@@ -31,9 +31,10 @@ auto Logic::loop() -> void
     // Light Control
     //TODO!: Implement Twilight Control
     if(mHmi->mSettings.lightControl.manualControl)
-        mIo->mRawData[PWM_LIGHT] = mLight.adjust(mHmi->mSettings.lightControl.intensity);
+        mIo->mRawData[PWM_LIGHT] = mLight.adjust(mHmi->mHeader.lightIntensity);
     else 
         mIo->mRawData[PWM_LIGHT] = 0;
+
 
 }
 /**
@@ -54,10 +55,16 @@ auto Logic::fanController(pidValues &_pidValues,
         return map(_fan.manualSpeed, 0, 100, _fan.minSpeed, _fan.maxSpeed);
     } // update the internal pid values from the HMI
 
-    _PID.SetOutputLimits(_fan.minSpeed, _fan.maxSpeed);
+    auto min = map(_fan.minSpeed, 0, 100, 0, 255);
+    auto max = map(_fan.maxSpeed, 0, 100, 0, 255);
+
+    _PID.SetOutputLimits(min, max);
     _PID.SetSampleTime(_pidValues.sampletime);
     _PID.SetTunings(_pidValues.Kp, _pidValues.Ki, _pidValues.Kd);  
     _PID.Compute();
+
+    auto hmiOutput = map(_pidValues.output, 0, 255, 0, 100);
+    mHmi->mHeader.fanSpeed = static_cast<byte>(hmiOutput);
     
 
     return static_cast<uint16_t>(_pidValues.output);

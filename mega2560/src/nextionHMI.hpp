@@ -84,6 +84,7 @@ class NextionHMI
         byte fanSpeed = 0; // 0 - 100 % fan speed
         byte lightIntensity = 0; // 0 - 100 % light intensity
         byte temperature = 0; // 0 - 100 °C 
+        byte humidity = 0; // 0 - 100 %
     } mHeader;
 
 };

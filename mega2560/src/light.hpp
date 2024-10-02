@@ -6,7 +6,7 @@
 class lightController
 {
     public:
-        auto adjust(uint8_t) -> byte;
+        auto adjust(byte&) -> byte;
 
 };
 
