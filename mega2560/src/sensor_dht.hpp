@@ -1,27 +1,32 @@
 #ifndef SENSOR_DHT_HPP
 #define SENSOR_DHT_HPP
 
-#include <Adafruit_Sensor.h>
 #include <DHT.h>
-#include <DHT_U.h>  
+#include <Adafruit_Sensor.h>
 
 class dhtSensor
 {
     public:
-        dhtSensor(uint8_t pin, uint8_t mode);
-    
+        dhtSensor(uint8_t pin, uint8_t mType = DHT21) : mPin(pin), mType(mType), mDht(pin, mType) {};
+        double mTemperature;
+        double mHumidity;
+
     private:
         uint8_t mPin;
-        uint8_t mMode;
+        uint8_t mType;
+        constexpr static uint8_t DHTTYPE PROGMEM = DHT21; 
         DHT mDht;
+        uint32_t mLastRead;
 
-    public:
-        auto start() -> void;
-        bool mIsStarted = false; // flag to check if the sensor has been started
+    private:
+        
 
     public:    
-        auto getHumidity() -> float;
-        auto getTemperature() -> float;
+        auto init() -> void;
+        auto getValues() -> int;
+        auto getReadTime() -> uint32_t { return mLastRead; };
+    
+
 
 
 

@@ -16,7 +16,7 @@ class NextionHMI
      * @note must be called in void setup()
      * @param baud 
      */
-    auto init(uint16_t baud) -> void
+    auto init(uint32_t baud) -> void
     {
         pEasyNex->begin(baud);
     }
@@ -83,8 +83,8 @@ class NextionHMI
         byte temperatureState = 0; // 0 == normal (green), 1 == warning (yellow), 2 == critical (red)
         byte fanSpeed = 0; // 0 - 100 % fan speed
         byte lightIntensity = 0; // 0 - 100 % light intensity
-        byte temperature = 0; // 0 - 100 °C 
-        byte humidity = 0; // 0 - 100 %
+        float temperature = 0; // 0 - 100 °C 
+        float humidity = 0; // 0 - 100 %
     } mHeader;
 
 };

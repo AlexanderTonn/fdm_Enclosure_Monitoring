@@ -14,7 +14,6 @@ auto lightController::adjust(byte *value) -> byte
         return 0;
 
     byte output = map(*value, 0, 100, 0, 255);
-    *value = map(output, 0, 255, 0, 100);
 
     return output;
 }

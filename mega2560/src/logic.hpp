@@ -8,6 +8,8 @@
 #include "pinMapping.hpp"
 #include "light.hpp"
 #include "nextionHMI.hpp"
+#include "sensor_dht.hpp"
+#include "timer.hpp"
 
 class Logic {
 public:
@@ -17,8 +19,11 @@ private:
     IO *mIo;
     NextionHMI *mHmi;
     lightController mLight;
+    dhtSensor *mDhtIndoor; // Object for sensor inside the enclosure
+    dhtSensor *mDhtOutdoor; // Object for sensor outside the enclosure
 
 public: 
+    auto init() -> void;
     auto loop() -> void;
 
 public:
@@ -42,6 +47,10 @@ private:
 
     PID mInletPID; // PID controller for the inlet fans
     PID mOutletPID; // PID controller for the outlet fans
+
+// Temperature & Humidity Control
+private:
+    timer mTempHumTimer;
 
 }; 
 

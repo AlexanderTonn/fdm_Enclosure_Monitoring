@@ -4,3 +4,6 @@
 [submodule "mega2560/lib/EasyNextionLibrary"]
 	path = mega2560/lib/EasyNextionLibrary
 	url = https://github.com/Seithan/EasyNextionLibrary.git
+[submodule "mega2560/lib/Arduino_FunctionTrigger"]
+	path = mega2560/lib/Arduino_FunctionTrigger
+	url = https://github.com/AlexanderTonn/Arduino_FunctionTrigger.git
