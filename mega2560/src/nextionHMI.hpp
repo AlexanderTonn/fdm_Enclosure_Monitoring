@@ -33,7 +33,7 @@ class NextionHMI
             struct speedLimits
             {
                 byte minSpeed = 0; // min speed of the fan in percent
-                byte maxSpeed = 100; // max speed of the fan in percent
+                byte maxSpeed = 80; // max speed of the fan in percent
                 bool manualMode = false; // manual mode 
                 byte manualSpeed = 40; // default speed in manual mode
             } SpeedInput, SpeedOutput;

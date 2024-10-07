@@ -16,8 +16,7 @@ constexpr static uint32_t baud PROGMEM = 115200;
 void setup() {
   // Setup Timer 4 Frequency to Prescaler 256
   TCCR4B = TCCR4B & 0b11111000 | 0x04;
-
-
+  
   Serial.begin(baud);
   delay(5000);
   Serial.println("Starting up...");

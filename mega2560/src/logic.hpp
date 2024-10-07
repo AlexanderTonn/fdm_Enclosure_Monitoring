@@ -44,6 +44,7 @@ private:
     auto fanController(pidValues &, PID&, NextionHMI::hmiSettings::fanControl::speedLimits) -> uint16_t;
     auto hmiToIntern() -> void;
     auto updateHmiData() -> void;
+    auto autosetpoint() -> void;
 
     PID mInletPID; // PID controller for the inlet fans
     PID mOutletPID; // PID controller for the outlet fans
@@ -51,6 +52,8 @@ private:
 // Temperature & Humidity Control
 private:
     timer mTempHumTimer;
+
+
 
 }; 
 

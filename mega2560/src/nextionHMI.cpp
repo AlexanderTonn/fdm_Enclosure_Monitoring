@@ -71,7 +71,7 @@ auto NextionHMI::initSettings() -> void
     pEasyNex->writeNum("lightControl3.c0.val", mSettings.lightControl.manualControl);
     pEasyNex->writeNum("lightControl3.h0.val", mSettings.lightControl.intensity);
     
-    pEasyNex->writeNum("fanControll1.n4.val", mSettings.fanControl.autoSetpoint);
+    pEasyNex->writeNum("fanControl1.c0.val", mSettings.fanControl.autoSetpoint);
     pEasyNex->writeNum("fanControl1.n4.val", mSettings.fanControl.setpoint);
     pEasyNex->writeNum("fanControl1.n5.val", mSettings.fanControl.warn);
     pEasyNex->writeNum("fanControl1.n6.val", mSettings.fanControl.critical);
@@ -88,6 +88,7 @@ auto NextionHMI::initSettings() -> void
     pEasyNex->writeNum("fanControl3.x5.val", mSettings.fanControl.pidOutput.Kd);
     pEasyNex->writeNum("fanControl3.n3.val", mSettings.fanControl.pidOutput.sampletime);
     pEasyNex->writeNum("fanControl4.c0.val", mSettings.fanControl.SpeedInput.manualMode);
+    pEasyNex->writeNum("fanControl4.h0.val", mSettings.fanControl.SpeedInput.manualSpeed);
     
     
 
@@ -123,6 +124,7 @@ auto NextionHMI::getSettings() -> void
     mSettings.fanControl.pidOutput.Kd = pEasyNex->readNumber("fanControl3.x5.val");
     mSettings.fanControl.pidOutput.sampletime = pEasyNex->readNumber("fanControl3.n3.val");
     mSettings.fanControl.SpeedInput.manualMode = pEasyNex->readNumber("fanControl4.c0.val");
+    mSettings.fanControl.SpeedInput.manualSpeed = pEasyNex->readNumber("fanControl4.h0.val");
 
     mSettings.humidityControl.humidityWarn = pEasyNex->readNumber("humidityControl1.n3.val");
     mSettings.humidityControl.humidityCritical = pEasyNex->readNumber("humidityControl1.n4.val");

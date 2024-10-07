@@ -19,20 +19,18 @@ auto Logic::init() -> void
     mInletPID.SetMode(AUTOMATIC);
     mOutletPID.SetMode(AUTOMATIC);
 
-    
     mDhtIndoor = new dhtSensor(DHT_INDOOR);
     mDhtOutdoor = new dhtSensor(DHT_OUTDOOR);
 
-    if(mDhtIndoor == nullptr || mDhtOutdoor == nullptr)
+    if (mDhtIndoor == nullptr || mDhtOutdoor == nullptr)
     {
         delete mDhtIndoor;
         delete mDhtOutdoor;
         return;
     }
-    
+
     mDhtIndoor->init();
     mDhtIndoor->init();
-    
 }
 /**
  * @brief Loop function for the logic
@@ -45,7 +43,6 @@ auto Logic::loop() -> void
 
     // Load HMI Settings to internal structures
     hmiToIntern();
-    
 
     // Temperature & Humidity Control
     // Reading temperature or humidity takes about 250 milliseconds!
@@ -58,16 +55,17 @@ auto Logic::loop() -> void
         mOutletValues.input = mDhtIndoor->mTemperature;
     }
 
+    if (mHmi->mSettings.fanControl.autoSetpoint)
+        autosetpoint();
+
     mIo->mRawData[PWM_FAN_OUT] = fanController(mOutletValues, mOutletPID, mHmi->mSettings.fanControl.SpeedOutput);
     mIo->mRawData[PWM_FAN_INTO] = fanController(mInletValues, mInletPID, mHmi->mSettings.fanControl.SpeedInput);
-
-
 
     // Light Control
     // TODO!: Implement Twilight Control
     if (mHmi->mSettings.lightControl.manualControl)
         mIo->mRawData[PWM_LIGHT] = mLight.adjust(&mHmi->mSettings.lightControl.intensity);
-    
+
     else if (mHmi->mSettings.lightControl.twilightControl)
     {
         // TODO!: Implement Twilight Control
@@ -120,7 +118,7 @@ auto Logic::hmiToIntern() -> void
 }
 /**
  * @brief Update the Data in the Header of the HMI
- * 
+ *
  */
 auto Logic::updateHmiData() -> void
 {
@@ -128,4 +126,15 @@ auto Logic::updateHmiData() -> void
     mHmi->mHeader.lightIntensity = map(mIo->mRawData[PWM_LIGHT], 0, 255, 0, 100);
     mHmi->mHeader.temperature = mDhtIndoor->mTemperature;
     mHmi->mHeader.humidity = mDhtIndoor->mHumidity;
+}
+/**
+ * @brief Assign environment temperature for PID setpoint
+ *
+ */
+auto Logic::autosetpoint() -> void
+{
+    if (!isnan(mDhtIndoor->mTemperature))
+        mHmi->mSettings.fanControl.setpoint = mDhtIndoor->mTemperature;
+    else
+        mHmi->mSettings.fanControl.autoSetpoint = false;
 }
