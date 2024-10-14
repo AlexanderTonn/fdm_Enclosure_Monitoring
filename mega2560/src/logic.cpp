@@ -55,23 +55,30 @@ auto Logic::loop() -> void
         mOutletValues.input = mDhtIndoor->mTemperature;
     }
 
-    if (mHmi->mSettings.fanControl.autoSetpoint)
-        autosetpoint();
+    if (mHmi->mSettings.fanControl.observeEnvironment)
+        autoMinTemperature();
 
-    mIo->mRawData[PWM_FAN_OUT] = fanController(mOutletValues, mOutletPID, mHmi->mSettings.fanControl.SpeedOutput);
-    mIo->mRawData[PWM_FAN_INTO] = fanController(mInletValues, mInletPID, mHmi->mSettings.fanControl.SpeedInput);
+    static auto PWM_outlet = fanController(mOutletValues, mOutletPID, mHmi->mSettings.fanControl.SpeedOutput);
+    static auto PWM_inlet = fanController(mInletValues, mInletPID, mHmi->mSettings.fanControl.SpeedInput);
+
 
     // Light Control
     // TODO!: Implement Twilight Control
+    static byte PWM_light = 0;
     if (mHmi->mSettings.lightControl.manualControl)
-        mIo->mRawData[PWM_LIGHT] = mLight.adjust(&mHmi->mSettings.lightControl.intensity);
+        PWM_light = mLight.adjust(&mHmi->mSettings.lightControl.intensity);
 
     else if (mHmi->mSettings.lightControl.twilightControl)
     {
         // TODO!: Implement Twilight Control
     }
     else
-        mIo->mRawData[PWM_LIGHT] = 0;
+        PWM_light = 0;
+
+    // Assign Arduino Outputs
+    mIo->setValue(PWM_FAN_OUT, PWM_outlet);
+    mIo->setValue(PWM_FAN_INTO, PWM_inlet);
+    mIo->setValue(PWM_LIGHT, PWM_light);
 
     updateHmiData();
 }
@@ -85,35 +92,43 @@ auto Logic::loop() -> void
  */
 auto Logic::fanController(pidValues &_pidValues,
                           PID &_PID,
-                          NextionHMI::hmiSettings::fanControl::speedLimits _fan) -> uint16_t
+                          NextionHMI::hmiSettings::fanControl::speedLimits &_fan) -> byte
 {
-    // Manual Mode selected
-    if (_fan.manualMode)
-    {
-        return map(_fan.manualSpeed, 0, 100, _fan.minSpeed, _fan.maxSpeed);
-    } // update the internal pid values from the HMI
-
     auto min = map(_fan.minSpeed, 0, 100, 0, 255);
     auto max = map(_fan.maxSpeed, 0, 100, 0, 255);
 
+    // Manual Mode selected
+    if (_fan.manualMode)
+    {
+        return map(_fan.manualSpeed, 0, 100, min, max);
+    } // update the internal pid values from the HMI
+
     _PID.SetOutputLimits(min, max);
     _PID.SetSampleTime(_pidValues.sampletime);
-    _PID.SetTunings(_pidValues.Kp, _pidValues.Ki, _pidValues.Kd);
+
+    //Converting the values from the HMI format to double
+    static auto factor = 0.01;
+    auto p = _pidValues.Kp*factor;
+    auto i = _pidValues.Ki*factor;
+    auto d = _pidValues.Kd*factor;
+
+    _PID.SetTunings(p, i, d);
     _PID.Compute();
 
-    return static_cast<uint16_t>(_pidValues.output);
+    return static_cast<byte>(_pidValues.output);
 }
 
 auto Logic::hmiToIntern() -> void
 {
-    mInletValues.Kd = mHmi->mSettings.fanControl.pidInput.Kd;
-    mInletValues.Ki = mHmi->mSettings.fanControl.pidInput.Ki;
-    mInletValues.Kp = mHmi->mSettings.fanControl.pidInput.Kp;
+    static auto factor = 0.01;
+    mInletValues.Kd = mHmi->mSettings.fanControl.pidInput.Kd*factor;
+    mInletValues.Ki = mHmi->mSettings.fanControl.pidInput.Ki*factor;
+    mInletValues.Kp = mHmi->mSettings.fanControl.pidInput.Kp*factor;
     mInletValues.sampletime = mHmi->mSettings.fanControl.pidInput.sampletime;
 
-    mOutletValues.Kd = mHmi->mSettings.fanControl.pidOutput.Kd;
-    mOutletValues.Ki = mHmi->mSettings.fanControl.pidOutput.Ki;
-    mOutletValues.Kp = mHmi->mSettings.fanControl.pidOutput.Kp;
+    mOutletValues.Kd = mHmi->mSettings.fanControl.pidOutput.Kd*factor;
+    mOutletValues.Ki = mHmi->mSettings.fanControl.pidOutput.Ki*factor;
+    mOutletValues.Kp = mHmi->mSettings.fanControl.pidOutput.Kp*factor;
     mOutletValues.sampletime = mHmi->mSettings.fanControl.pidOutput.sampletime;
 }
 /**
@@ -128,13 +143,16 @@ auto Logic::updateHmiData() -> void
     mHmi->mHeader.humidity = mDhtIndoor->mHumidity;
 }
 /**
- * @brief Assign environment temperature for PID setpoint
+ * @brief Assign environment temperature as min value if the outdoor temperature is lower
  *
  */
-auto Logic::autosetpoint() -> void
+auto Logic::autoMinTemperature() -> void
 {
-    if (!isnan(mDhtIndoor->mTemperature))
-        mHmi->mSettings.fanControl.setpoint = mDhtIndoor->mTemperature;
+    if (!isnan(mDhtOutdoor->mTemperature))
+    {
+        if(mDhtOutdoor->mTemperature < mDhtIndoor->mTemperature)
+            mHmi->mSettings.fanControl.setpoint = mDhtOutdoor->mTemperature;
+    }
     else
-        mHmi->mSettings.fanControl.autoSetpoint = false;
+        mHmi->mSettings.fanControl.observeEnvironment = false;
 }

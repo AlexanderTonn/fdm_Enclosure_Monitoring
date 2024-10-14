@@ -26,22 +26,25 @@ class NextionHMI
     {
         struct fanControl
         {
-            bool autoSetpoint = true; // flag to check if the setpoint is set automatically
+            bool observeEnvironment = true; // flag to check for taking the temperature from the environment
             byte setpoint = 25; // default setpoint for fancontrol
             byte warn = 30; // warning temperature
             byte critical = 35; // critical temperature
             struct speedLimits
             {
                 byte minSpeed = 0; // min speed of the fan in percent
-                byte maxSpeed = 80; // max speed of the fan in percent
+                byte maxSpeed = 50; // max speed of the fan in percent
                 bool manualMode = false; // manual mode 
                 byte manualSpeed = 40; // default speed in manual mode
             } SpeedInput, SpeedOutput;
+            
+            // for Sending to HMI it's necessary to send the values as uint32_t
+            // 0,15 == 15
             struct pidValues
             {
-                float Kp = 3.0;
-                float Ki = 0.15;
-                float Kd = 0.15;
+                uint32_t Kp = 100;
+                uint32_t Ki = 15;
+                uint32_t Kd = 15;
                 uint16_t sampletime = 100; // sample time in ms
 
             } pidInput, pidOutput;

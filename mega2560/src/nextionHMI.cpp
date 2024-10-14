@@ -71,7 +71,7 @@ auto NextionHMI::initSettings() -> void
     pEasyNex->writeNum("lightControl3.c0.val", mSettings.lightControl.manualControl);
     pEasyNex->writeNum("lightControl3.h0.val", mSettings.lightControl.intensity);
     
-    pEasyNex->writeNum("fanControl1.c0.val", mSettings.fanControl.autoSetpoint);
+    pEasyNex->writeNum("fanControl1.c0.val", mSettings.fanControl.observeEnvironment);
     pEasyNex->writeNum("fanControl1.n4.val", mSettings.fanControl.setpoint);
     pEasyNex->writeNum("fanControl1.n5.val", mSettings.fanControl.warn);
     pEasyNex->writeNum("fanControl1.n6.val", mSettings.fanControl.critical);
@@ -90,7 +90,6 @@ auto NextionHMI::initSettings() -> void
     pEasyNex->writeNum("fanControl4.c0.val", mSettings.fanControl.SpeedInput.manualMode);
     pEasyNex->writeNum("fanControl4.h0.val", mSettings.fanControl.SpeedInput.manualSpeed);
     
-    
 
 }
 /**
@@ -107,7 +106,7 @@ auto NextionHMI::getSettings() -> void
     mSettings.lightControl.manualControl = pEasyNex->readNumber("lightControl3.c0.val");
     mSettings.lightControl.intensity = pEasyNex->readNumber("lightControl3.h0.val");
 
-    mSettings.fanControl.autoSetpoint = pEasyNex->readNumber("fanControl1.c0.val");
+    mSettings.fanControl.observeEnvironment = pEasyNex->readNumber("fanControl1.c0.val");
     mSettings.fanControl.setpoint = pEasyNex->readNumber("fanControl1.n4.val");
     mSettings.fanControl.warn = pEasyNex->readNumber("fanControl1.n5.val");
     mSettings.fanControl.critical = pEasyNex->readNumber("fanControl1.n6.val");
@@ -124,7 +123,9 @@ auto NextionHMI::getSettings() -> void
     mSettings.fanControl.pidOutput.Kd = pEasyNex->readNumber("fanControl3.x5.val");
     mSettings.fanControl.pidOutput.sampletime = pEasyNex->readNumber("fanControl3.n3.val");
     mSettings.fanControl.SpeedInput.manualMode = pEasyNex->readNumber("fanControl4.c0.val");
+    mSettings.fanControl.SpeedOutput.manualMode = mSettings.fanControl.SpeedInput.manualMode;
     mSettings.fanControl.SpeedInput.manualSpeed = pEasyNex->readNumber("fanControl4.h0.val");
+    mSettings.fanControl.SpeedOutput.manualSpeed = mSettings.fanControl.SpeedInput.manualSpeed;
 
     mSettings.humidityControl.humidityWarn = pEasyNex->readNumber("humidityControl1.n3.val");
     mSettings.humidityControl.humidityCritical = pEasyNex->readNumber("humidityControl1.n4.val");
