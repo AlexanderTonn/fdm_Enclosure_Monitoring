@@ -3,13 +3,13 @@
 
 #include <Arduino.h>
 #include <io.hpp>
-#include <PID_v1.h>
 
 #include "pinMapping.hpp"
 #include "light.hpp"
 #include "nextionHMI.hpp"
 #include "sensor_dht.hpp"
 #include "timer.hpp"
+#include "pidController.hpp"
 
 class Logic {
 public:
@@ -30,9 +30,9 @@ public:
     // must be public for accessing by hmi class
     struct pidValues
     {
-        double Kp = 1.0;
-        double Ki = 0.15;
-        double Kd = 0.25;
+        double Kp = 0.5;
+        double Ki = 0.05;
+        double Kd = 0.15;
         double setpoint = 25.0;
         double input;
         double output;
@@ -41,9 +41,9 @@ public:
 
 // functions for fan control
 private:
-    auto fanController(pidValues&, PID&, NextionHMI::hmiSettings::fanControl::speedLimits&) -> byte;
+    auto fanController(pidValues*, PID*, NextionHMI::hmiSettings::fanControl::speedLimits*) -> byte;
     auto hmiToIntern() -> void;
-    auto updateHmiData() -> void;
+    auto updateHmiData(byte,byte,float,float) -> void;
     auto autoMinTemperature() -> void;
 
     PID mInletPID; // PID controller for the inlet fans
