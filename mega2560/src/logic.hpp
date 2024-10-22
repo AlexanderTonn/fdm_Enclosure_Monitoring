@@ -41,7 +41,11 @@ public:
 
 // functions for fan control
 private:
-    auto fanController(pidValues*, PID*, NextionHMI::hmiSettings::fanControl::speedLimits*) -> byte;
+    auto fanController(pidValues*, 
+                        PID*, 
+                        NextionHMI::hmiSettings::fanControl::speedLimits*,
+                        uint16_t ,
+                        uint16_t ) -> byte;
     auto hmiToIntern() -> void;
     auto updateHmiData(byte,byte,float,float) -> void;
     auto autoMinTemperature() -> void;

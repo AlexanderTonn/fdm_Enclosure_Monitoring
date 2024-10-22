@@ -13,6 +13,18 @@ auto PID::setTunings(double Kp, double Ki, double Kd, double sampletime) -> void
     mKi = Ki;
     mKd = Kd;
     mSampletime = sampletime;
+
+    // reset the controller if the values has been changed
+    static double kpChanged = 0, kiChanged = 0, kdChanged = 0;
+    if (mKp != kpChanged || mKi != kiChanged || mKd != kdChanged)
+    {
+        Serial.println("PID values changed");
+        kpChanged = mKp;
+        kiChanged = mKi;
+        kdChanged = mKd;
+        reset();
+    }
+
 }
 /**
  * @brief Reset the PID controller
@@ -90,11 +102,21 @@ auto PID::calc(double setpoint, double actual) -> double
 }
 /**
  * @brief Invert the output signal
- * @note if true and setpoint is higher than actual value the output signal will be increased 
- * @note if false and setpoint is higher than actual value the output signal will be decreased
- * @param invert 
+ * @note DIRECT means the output signal will be increased if the setpoint is lower than the actual value
+ * @note REVERSE means the output signal will be increased if the setpoint is higher than the actual value
+ * @param PID::Direction
  */
-auto PID::setInvert(bool invert) -> void
+auto PID::setDirection(PID::Direction direction = PID::Direction::DIRECT) -> void
 {
-    mInvertSignal = invert ? -1.0 : 1.0;
+    switch (direction)
+    {
+    case PID::Direction::DIRECT:
+        mInvertSignal = 1.0;
+        break;
+    case PID::Direction::REVERSE:
+        mInvertSignal = -1.0;
+        break;
+    default:
+        break;
+    }
 }

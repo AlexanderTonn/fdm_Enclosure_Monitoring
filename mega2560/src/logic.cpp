@@ -1,8 +1,6 @@
 #include "logic.hpp"
 
-Logic::Logic(IO *io, NextionHMI *hmi) : mIo(io), mHmi(hmi),
-                                        mInletPID(&mInletValues.input, &mInletValues.output, &mInletValues.setpoint, mInletValues.Kp, mInletValues.Ki, mInletValues.Kd, REVERSE),
-                                        mOutletPID(&mOutletValues.input, &mOutletValues.output, &mOutletValues.setpoint, mOutletValues.Kp, mOutletValues.Ki, mOutletValues.Kd, REVERSE)
+Logic::Logic(IO *io, NextionHMI *hmi) : mIo(io), mHmi(hmi)
 {
 }
 
@@ -16,9 +14,6 @@ auto Logic::init() -> void
 
     initDone = true;
 
-    mInletPID.SetMode(AUTOMATIC);
-    mOutletPID.SetMode(AUTOMATIC);
-
     mDhtIndoor = new dhtSensor(DHT_INDOOR);
     mDhtOutdoor = new dhtSensor(DHT_OUTDOOR);
 
@@ -28,6 +23,11 @@ auto Logic::init() -> void
         delete mDhtOutdoor;
         return;
     }
+
+    mInletPID.setDirection(PID::Direction::REVERSE);
+    mOutletPID.setDirection(PID::Direction::REVERSE);
+    mInletPID.setSampletime(100);
+    mOutletPID.setSampletime(100);
 
     mDhtIndoor->init();
     mDhtIndoor->init();
@@ -60,9 +60,16 @@ auto Logic::loop() -> void
 
     mInletValues.setpoint = mHmi->mSettings.fanControl.setpoint;
     mOutletValues.setpoint = mHmi->mSettings.fanControl.setpoint;
-    static auto PWM_outlet = fanController(&mOutletValues, &mOutletPID, &mHmi->mSettings.fanControl.SpeedOutput);
-    static auto PWM_inlet = fanController(&mInletValues, &mInletPID, &mHmi->mSettings.fanControl.SpeedInput);
-
+    auto PWM_outlet = fanController( &mOutletValues, 
+                                            &mOutletPID, 
+                                            &mHmi->mSettings.fanControl.SpeedOutput,
+                                            mHmi->mSettings.fanControl.setpoint,
+                                            mDhtIndoor->mTemperature);
+    auto PWM_inlet = fanController(  &mInletValues, 
+                                            &mInletPID, 
+                                            &mHmi->mSettings.fanControl.SpeedInput,
+                                            mHmi->mSettings.fanControl.setpoint,
+                                            mDhtIndoor->mTemperature);
 
     // Light Control
     // TODO!: Implement Twilight Control
@@ -78,9 +85,9 @@ auto Logic::loop() -> void
         PWM_light = 0;
 
     // Assign Arduino Outputs
-    Serial.println("PWM Outlet: " + String(PWM_outlet) + " PWM Inlet: " + String(PWM_inlet) + " PWM Light: " + String(PWM_light));
-    mIo->setValue(PWM_FAN_OUT, PWM_outlet); 
-    mIo->setValue(PWM_FAN_INTO, PWM_inlet);
+    Serial.println("PWM Out " + String(PWM_outlet));
+    mIo->setValue(PWM_FAN_OUT, static_cast<uint16_t>(PWM_outlet)); 
+    mIo->setValue(PWM_FAN_INTO, static_cast<uint16_t>(PWM_inlet));
     mIo->setValue(PWM_LIGHT, PWM_light);
 
     updateHmiData(PWM_outlet, PWM_light, mDhtIndoor->mTemperature, mDhtIndoor->mHumidity);
@@ -95,7 +102,9 @@ auto Logic::loop() -> void
  */
 auto Logic::fanController(pidValues *_pidValues,
                           PID *_PID,
-                          NextionHMI::hmiSettings::fanControl::speedLimits *_fan) -> byte
+                          NextionHMI::hmiSettings::fanControl::speedLimits *_fan,
+                          uint16_t setpoint, 
+                          uint16_t actual) -> byte
 {
     auto min = map(_fan->minSpeed, 0, 100, 0, 255);
     auto max = map(_fan->maxSpeed, 0, 100, 0, 255);
@@ -115,10 +124,9 @@ auto Logic::fanController(pidValues *_pidValues,
     auto i = _pidValues->Ki*factor;
     auto d = _pidValues->Kd*factor;
 
-    _PID->SetTunings(p, i, d);
-    _PID->Compute();
+    _PID->setTunings(p, i, d, _pidValues->sampletime);
+    return _PID->calc(setpoint, actual);
 
-    return static_cast<byte>(_pidValues->output);
 }
 
 auto Logic::hmiToIntern() -> void
