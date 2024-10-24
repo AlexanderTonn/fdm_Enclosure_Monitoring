@@ -10,7 +10,7 @@
 #include "sensor_dht.hpp"
 #include "timer.hpp"
 #include "pidController.hpp"
-
+#include "sensor_mq135.hpp"
 class Logic {
 public:
     Logic(IO *io, NextionHMI *hmi);
@@ -21,6 +21,7 @@ private:
     lightController mLight;
     dhtSensor *mDhtIndoor; // Object for sensor inside the enclosure
     dhtSensor *mDhtOutdoor; // Object for sensor outside the enclosure
+    MQ_135 mMQ135; // Object for the MQ135 sensor
 
 public: 
     auto init() -> void;

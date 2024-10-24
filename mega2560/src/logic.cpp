@@ -43,7 +43,7 @@ auto Logic::loop() -> void
 
     // Load HMI Settings to internal structures
     hmiToIntern();
-
+    auto static gasConcentration = mMQ135.getConcentration(mIo);
     // Temperature & Humidity Control
     // Reading temperature or humidity takes about 250 milliseconds!
     // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
