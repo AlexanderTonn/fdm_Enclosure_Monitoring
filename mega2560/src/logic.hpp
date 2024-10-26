@@ -38,7 +38,7 @@ public:
         double input;
         double output;
         uint16_t sampletime = 100; // sample time in ms
-    }mInletValues, mOutletValues;
+    }mPID_values;
 
 // functions for fan control
 private:
@@ -51,8 +51,7 @@ private:
     auto updateHmiData(byte,byte,float,float) -> void;
     auto autoMinTemperature() -> void;
 
-    PID mInletPID; // PID controller for the inlet fans
-    PID mOutletPID; // PID controller for the outlet fans
+    PID mPID; // PID controller for the fans
 
 // Temperature & Humidity Control
 private:

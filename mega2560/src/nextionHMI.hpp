@@ -36,18 +36,18 @@ class NextionHMI
                 byte maxSpeed = 50; // max speed of the fan in percent
                 bool manualMode = false; // manual mode 
                 byte manualSpeed = 40; // default speed in manual mode
-            } SpeedInput, SpeedOutput;
+            } Speed;
             
             // for Sending to HMI it's necessary to send the values as uint32_t
             // 0,15 == 15
             struct pidValues
             {
-                uint32_t Kp = 100;
-                uint32_t Ki = 15;
-                uint32_t Kd = 15;
+                uint32_t Kp = 50;
+                uint32_t Ki = 10;
+                uint32_t Kd = 10;
                 uint16_t sampletime = 100; // sample time in ms
 
-            } pidInput, pidOutput;
+            } pid;
 
         } fanControl;
         struct lightControl

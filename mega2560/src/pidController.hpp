@@ -23,9 +23,9 @@ class PID
 
     private: 
         double mIntegral, mPrev_error;
-        double mKp = 0.15; 
-        double mKi = 0.01; 
-        double mKd = 0.01;
+        double mKp;
+        double mKi;
+        double mKd;
         double mSampletime = 1000.0;
         double mInvertSignal = 1.0;
         double mMin = 0.0, mMax = 1023.0; 

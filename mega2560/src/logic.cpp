@@ -24,10 +24,8 @@ auto Logic::init() -> void
         return;
     }
 
-    mInletPID.setDirection(PID::Direction::REVERSE);
-    mOutletPID.setDirection(PID::Direction::REVERSE);
-    mInletPID.setSampletime(100);
-    mOutletPID.setSampletime(100);
+    mPID.setDirection(PID::Direction::REVERSE);
+    mPID.setSampletime(100);
 
     mDhtIndoor->init();
     mDhtIndoor->init();
@@ -51,25 +49,18 @@ auto Logic::loop() -> void
     {
         mDhtIndoor->getValues();
         mDhtOutdoor->getValues();
-        mInletValues.input = mDhtIndoor->mTemperature;
-        mOutletValues.input = mDhtIndoor->mTemperature;
+        mPID_values.input = mDhtIndoor->mTemperature;
     }
 
     if (mHmi->mSettings.fanControl.observeEnvironment)
         autoMinTemperature();
 
-    mInletValues.setpoint = mHmi->mSettings.fanControl.setpoint;
-    mOutletValues.setpoint = mHmi->mSettings.fanControl.setpoint;
-    auto PWM_outlet = fanController( &mOutletValues, 
-                                            &mOutletPID, 
-                                            &mHmi->mSettings.fanControl.SpeedOutput,
-                                            mHmi->mSettings.fanControl.setpoint,
-                                            mDhtIndoor->mTemperature);
-    auto PWM_inlet = fanController(  &mInletValues, 
-                                            &mInletPID, 
-                                            &mHmi->mSettings.fanControl.SpeedInput,
-                                            mHmi->mSettings.fanControl.setpoint,
-                                            mDhtIndoor->mTemperature);
+    mPID_values.setpoint = mHmi->mSettings.fanControl.setpoint;
+    auto fanSignal = fanController( &mPID_values, 
+                                    &mPID, 
+                                    &mHmi->mSettings.fanControl.Speed,
+                                    mHmi->mSettings.fanControl.setpoint,
+                                    mDhtIndoor->mTemperature);
 
     // Light Control
     // TODO!: Implement Twilight Control
@@ -85,12 +76,11 @@ auto Logic::loop() -> void
         PWM_light = 0;
 
     // Assign Arduino Outputs
-    Serial.println("PWM Out " + String(PWM_outlet));
-    mIo->setValue(PWM_FAN_OUT, static_cast<uint16_t>(PWM_outlet)); 
-    mIo->setValue(PWM_FAN_INTO, static_cast<uint16_t>(PWM_inlet));
+    mIo->setValue(PWM_FAN_OUT, static_cast<uint16_t>(fanSignal)); 
+    mIo->setValue(PWM_FAN_INTO, static_cast<uint16_t>(fanSignal));
     mIo->setValue(PWM_LIGHT, PWM_light);
 
-    updateHmiData(PWM_outlet, PWM_light, mDhtIndoor->mTemperature, mDhtIndoor->mHumidity);
+    updateHmiData(fanSignal, PWM_light, mDhtIndoor->mTemperature, mDhtIndoor->mHumidity);
 }
 /**
  * @brief Control the enclosure fans by using PID controller
@@ -132,15 +122,10 @@ auto Logic::fanController(pidValues *_pidValues,
 auto Logic::hmiToIntern() -> void
 {
     static auto factor = 0.01;
-    mInletValues.Kd = mHmi->mSettings.fanControl.pidInput.Kd*factor;
-    mInletValues.Ki = mHmi->mSettings.fanControl.pidInput.Ki*factor;
-    mInletValues.Kp = mHmi->mSettings.fanControl.pidInput.Kp*factor;
-    mInletValues.sampletime = mHmi->mSettings.fanControl.pidInput.sampletime;
-
-    mOutletValues.Kd = mHmi->mSettings.fanControl.pidOutput.Kd*factor;
-    mOutletValues.Ki = mHmi->mSettings.fanControl.pidOutput.Ki*factor;
-    mOutletValues.Kp = mHmi->mSettings.fanControl.pidOutput.Kp*factor;
-    mOutletValues.sampletime = mHmi->mSettings.fanControl.pidOutput.sampletime;
+    mPID_values.Kd = mHmi->mSettings.fanControl.pid.Kd*factor;
+    mPID_values.Ki = mHmi->mSettings.fanControl.pid.Ki*factor;
+    mPID_values.Kp = mHmi->mSettings.fanControl.pid.Kp*factor;
+    mPID_values.sampletime = mHmi->mSettings.fanControl.pid.sampletime;
 }
 /**
  * @brief Update the Data in the Header of the HMI
