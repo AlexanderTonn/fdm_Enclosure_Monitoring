@@ -12,13 +12,11 @@ auto PID::setTunings(double Kp, double Ki, double Kd, double sampletime) -> void
     mKp = Kp;
     mKi = Ki;
     mKd = Kd;
-    mSampletime = sampletime;
 
     // reset the controller if the values has been changed
     static double kpChanged = 0, kiChanged = 0, kdChanged = 0;
     if (mKp != kpChanged || mKi != kiChanged || mKd != kdChanged)
     {
-        Serial.println("PID values changed");
         kpChanged = mKp;
         kiChanged = mKi;
         kdChanged = mKd;
@@ -46,15 +44,7 @@ auto PID::setLimits(double min, double max) -> void
     mMin = min;
     mMax = max;
 }
-/**
- * @brief  Set the sample time for the PID controller
- * 
- * @param sampletime 
- */
-auto PID::setSampletime(double sampletime) -> void
-{
-    mSampletime = sampletime;
-}
+
 
 /**
  * @brief  Calculate the PID output
@@ -65,40 +55,50 @@ auto PID::setSampletime(double sampletime) -> void
  */
 auto PID::calc(double setpoint, double actual) -> double 
 {
+    auto millisNow = millis();
+
+    static auto result = 0.0; // store the result for the next iteration
+
+    if( millisNow - mMillisOld < mSampleTime )
+        return result;
+
+    auto deltaTime = (millisNow - mMillisOld) / mTimeConversionFactor;
+    mMillisOld = millisNow;
+
     auto error = setpoint - actual;
 
     // Proportional term
     auto p = mKp * error;
 
     // Integral term
-    mIntegral += error * mSampletime;
+    mIntegral += error * deltaTime;
     auto i = mKi * mIntegral;
 
     // Derivative term
-    auto derivative = (error - mPrev_error) / mSampletime;
+    auto derivative = (error - mPrev_error) / deltaTime;
     auto d = mKd * derivative;
 
     // output
-    auto out = p + i + d;
+    result = p + i + d;
 
     // save for next iteration
     mPrev_error = error;
 
     // Limit the output signal range
-    if(out > mMax)
+    if(result > mMax)
     {
-        out = mMax;
+        result = mMax;
         // Prevent integral wind-up
-        mIntegral -= error * mSampletime;
+        mIntegral -= error * deltaTime;
     }
-    else if(out < mMin)
+    else if(result < mMin)
     {
-        out = mMin;
+        result = mMin;
         // Prevent integral wind-up
-        mIntegral -= error * mSampletime;
+        mIntegral -= error * deltaTime;
     }
 
-    return out * mInvertSignal;
+    return result * mDirection;
 }
 /**
  * @brief Invert the output signal
@@ -111,12 +111,31 @@ auto PID::setDirection(PID::Direction direction = PID::Direction::DIRECT) -> voi
     switch (direction)
     {
     case PID::Direction::DIRECT:
-        mInvertSignal = 1.0;
+        mDirection = 1.0;
         break;
     case PID::Direction::REVERSE:
-        mInvertSignal = -1.0;
+        mDirection = -1.0;
         break;
     default:
         break;
     }
+}
+/**
+ * @brief set time conversion factor
+ * @note a higher value will result a slower response because of shorter time difference
+ * 
+ * @param timeConversionFactor 
+ */
+auto PID::setTimeConversionFactor(double timeConversionFactor) -> void
+{
+    mTimeConversionFactor = timeConversionFactor;
+}
+/**
+ * @brief Set the sample time for the PID controller
+ * 
+ * @param sampleTime 
+ */
+auto PID::setSampleTime(uint16_t sampleTime) -> void
+{
+    mSampleTime = sampleTime;
 }

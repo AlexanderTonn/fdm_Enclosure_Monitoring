@@ -27,27 +27,9 @@ public:
     auto init() -> void;
     auto loop() -> void;
 
-public:
-    // must be public for accessing by hmi class
-    struct pidValues
-    {
-        double Kp = 0.5;
-        double Ki = 0.05;
-        double Kd = 0.15;
-        double setpoint = 25.0;
-        double input;
-        double output;
-        uint16_t sampletime = 100; // sample time in ms
-    }mPID_values;
-
 // functions for fan control
 private:
-    auto fanController(pidValues*, 
-                        PID*, 
-                        NextionHMI::hmiSettings::fanControl::speedLimits*,
-                        uint16_t ,
-                        uint16_t ) -> byte;
-    auto hmiToIntern() -> void;
+    auto fanController() -> byte;
     auto updateHmiData(byte,byte,float,float) -> void;
     auto autoMinTemperature() -> void;
 

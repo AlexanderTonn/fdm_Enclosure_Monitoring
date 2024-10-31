@@ -25,7 +25,6 @@ auto Logic::init() -> void
     }
 
     mPID.setDirection(PID::Direction::REVERSE);
-    mPID.setSampletime(100);
 
     mDhtIndoor->init();
     mDhtIndoor->init();
@@ -40,7 +39,7 @@ auto Logic::loop() -> void
         return;
 
     // Load HMI Settings to internal structures
-    hmiToIntern();
+
     auto static gasConcentration = mMQ135.getConcentration(mIo);
     // Temperature & Humidity Control
     // Reading temperature or humidity takes about 250 milliseconds!
@@ -49,18 +48,12 @@ auto Logic::loop() -> void
     {
         mDhtIndoor->getValues();
         mDhtOutdoor->getValues();
-        mPID_values.input = mDhtIndoor->mTemperature;
     }
 
     if (mHmi->mSettings.fanControl.observeEnvironment)
         autoMinTemperature();
 
-    mPID_values.setpoint = mHmi->mSettings.fanControl.setpoint;
-    auto fanSignal = fanController( &mPID_values, 
-                                    &mPID, 
-                                    &mHmi->mSettings.fanControl.Speed,
-                                    mHmi->mSettings.fanControl.setpoint,
-                                    mDhtIndoor->mTemperature);
+    auto fanSignal = fanController();
 
     // Light Control
     // TODO!: Implement Twilight Control
@@ -76,6 +69,7 @@ auto Logic::loop() -> void
         PWM_light = 0;
 
     // Assign Arduino Outputs
+    Serial.println("Fan Signal: " + String(fanSignal));
     mIo->setValue(PWM_FAN_OUT, static_cast<uint16_t>(fanSignal)); 
     mIo->setValue(PWM_FAN_INTO, static_cast<uint16_t>(fanSignal));
     mIo->setValue(PWM_LIGHT, PWM_light);
@@ -90,42 +84,28 @@ auto Logic::loop() -> void
  * @param _fan instance of the fan settings struct from the HMI - read only
  * @return uint16_t
  */
-auto Logic::fanController(pidValues *_pidValues,
-                          PID *_PID,
-                          NextionHMI::hmiSettings::fanControl::speedLimits *_fan,
-                          uint16_t setpoint, 
-                          uint16_t actual) -> byte
+auto Logic::fanController() -> byte
 {
-    auto min = map(_fan->minSpeed, 0, 100, 0, 255);
-    auto max = map(_fan->maxSpeed, 0, 100, 0, 255);
+    auto min = map(mHmi->mSettings.fanControl.Speed.minSpeed, 0, 100, 0, 255);
+    auto max = map(mHmi->mSettings.fanControl.Speed.maxSpeed, 0, 100, 0, 255);
 
     // Manual Mode selected
-    if (_fan->manualMode)
+    if (mHmi->mSettings.fanControl.Speed.manualMode)
     {
-        return map(_fan->manualSpeed, 0, 100, min, max);
+        return map(mHmi->mSettings.fanControl.Speed.manualSpeed, 0, 100, min, max);
     } // update the internal pid values from the HMI
 
-    _PID->setLimits(min, max);
-    _PID->setSampletime(_pidValues->sampletime);
+    mPID.setLimits(min, max);
 
     //Converting the values from the HMI format to double
     static auto factor = 0.01;
-    auto p = _pidValues->Kp*factor;
-    auto i = _pidValues->Ki*factor;
-    auto d = _pidValues->Kd*factor;
+    auto p = mHmi->mSettings.fanControl.pid.Kp*factor;
+    auto i = mHmi->mSettings.fanControl.pid.Ki*factor;
+    auto d = mHmi->mSettings.fanControl.pid.Kd*factor;
 
-    _PID->setTunings(p, i, d, _pidValues->sampletime);
-    return _PID->calc(setpoint, actual);
+    mPID.setTunings(p, i, d, mHmi->mSettings.fanControl.pid.sampletime);
+    return mPID.calc(mHmi->mSettings.fanControl.setpoint, mDhtIndoor->mTemperature);
 
-}
-
-auto Logic::hmiToIntern() -> void
-{
-    static auto factor = 0.01;
-    mPID_values.Kd = mHmi->mSettings.fanControl.pid.Kd*factor;
-    mPID_values.Ki = mHmi->mSettings.fanControl.pid.Ki*factor;
-    mPID_values.Kp = mHmi->mSettings.fanControl.pid.Kp*factor;
-    mPID_values.sampletime = mHmi->mSettings.fanControl.pid.sampletime;
 }
 /**
  * @brief Update the Data in the Header of the HMI

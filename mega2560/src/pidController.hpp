@@ -17,8 +17,9 @@ class PID
     };
         auto setDirection(Direction) -> void;
         auto setLimits(double min, double max) -> void;
-        auto setSampletime(double sampletime) -> void;
         auto setSetpoint(double setpoint) -> void;
+        auto setTimeConversionFactor(double timeConversionFactor) -> void;
+        auto setSampleTime(uint16_t sampleTime) -> void;
         
 
     private: 
@@ -26,9 +27,11 @@ class PID
         double mKp;
         double mKi;
         double mKd;
-        double mSampletime = 1000.0;
-        double mInvertSignal = 1.0;
+        double mDirection = 1.0;
         double mMin = 0.0, mMax = 1023.0; 
+        uint16_t mSampleTime = 1000;
+        double mTimeConversionFactor = 1000.0;
+        uint32_t mMillisOld ;
 
 
 };
