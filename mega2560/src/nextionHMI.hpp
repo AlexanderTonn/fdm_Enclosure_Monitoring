@@ -76,6 +76,12 @@ class NextionHMI
 
     auto getSettings() -> void;
     auto setHeaderData() -> void;
+    auto updateSettings() -> void;
+
+    private:
+    auto checksumChanged() -> bool;
+    uint16_t mChecksum ;// checksum for the settings
+    uint16_t mOldChecksum ;
 
     public:
     struct hmiHeader

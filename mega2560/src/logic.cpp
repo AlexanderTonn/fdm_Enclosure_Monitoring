@@ -68,8 +68,6 @@ auto Logic::loop() -> void
     else
         PWM_light = 0;
 
-    // Assign Arduino Outputs
-    Serial.println("Fan Signal: " + String(fanSignal));
     mIo->setValue(PWM_FAN_OUT, static_cast<uint16_t>(fanSignal)); 
     mIo->setValue(PWM_FAN_INTO, static_cast<uint16_t>(fanSignal));
     mIo->setValue(PWM_LIGHT, PWM_light);
@@ -126,7 +124,7 @@ auto Logic::autoMinTemperature() -> void
 {
     if (!isnan(mDhtOutdoor->mTemperature))
     {
-        if(mDhtOutdoor->mTemperature < mDhtIndoor->mTemperature)
+        if(mDhtIndoor->mTemperature < mDhtOutdoor->mTemperature)
             mHmi->mSettings.fanControl.setpoint = mDhtOutdoor->mTemperature;
     }
     else

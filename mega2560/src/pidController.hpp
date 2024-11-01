@@ -12,8 +12,8 @@ class PID
 
     enum class Direction
     {
-        DIRECT = 0,
-        REVERSE = 1
+        DIRECT = 1,
+        REVERSE = -1
     };
         auto setDirection(Direction) -> void;
         auto setLimits(double min, double max) -> void;

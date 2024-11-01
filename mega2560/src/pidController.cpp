@@ -98,6 +98,9 @@ auto PID::calc(double setpoint, double actual) -> double
         mIntegral -= error * deltaTime;
     }
 
+    if(mDirection == static_cast<int>(Direction::REVERSE))
+        result = mMax - (result - mMin);
+
     return result * mDirection;
 }
 /**

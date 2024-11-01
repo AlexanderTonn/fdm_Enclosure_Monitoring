@@ -116,3 +116,33 @@ auto NextionHMI::getSettings() -> void
     mSettings.humidityControl.humidityWarn = pEasyNex->readNumber("humidityControl1.n3.val");
     mSettings.humidityControl.humidityCritical = pEasyNex->readNumber("humidityControl1.n4.val");
 }
+/**
+ * @brief Update the hmi settings if the settings are changed
+ * @note this function should prevent unnecessary updates of the settings
+ */
+auto NextionHMI::updateSettings() -> void
+{
+    if(!checksumChanged())
+        return;
+    
+    pEasyNex->writeNum("fanControl1.n4.val", mSettings.fanControl.setpoint);
+    pEasyNex->writeNum("fanControl1.c0.val", mSettings.fanControl.observeEnvironment);
+
+}
+/**
+ * @brief Updates the checksumm of the settings
+ * @note 
+ * @param String 
+ * @return void
+ */
+auto NextionHMI::checksumChanged() -> bool
+{
+    mChecksum += mSettings.fanControl.setpoint;
+    mChecksum += mSettings.fanControl.observeEnvironment; 
+
+    if(mChecksum == mOldChecksum)
+        return false;
+
+    mOldChecksum = mChecksum;
+    return true; 
+}
