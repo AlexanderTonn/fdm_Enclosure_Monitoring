@@ -79,7 +79,10 @@ auto PID::calc(double setpoint, double actual) -> double
     auto d = mKd * derivative;
 
     // output
-    result = p + i + d;
+    if(mDirection == static_cast<int>(Direction::REVERSE))
+        result = -p - i - d;
+    else 
+        result = p + i + d;
 
     // save for next iteration
     mPrev_error = error;
@@ -88,20 +91,21 @@ auto PID::calc(double setpoint, double actual) -> double
     if(result > mMax)
     {
         result = mMax;
+
         // Prevent integral wind-up
-        mIntegral -= error * deltaTime;
+        if(error > 0)
+            mIntegral -= error * deltaTime;
     }
     else if(result < mMin)
     {
         result = mMin;
+
         // Prevent integral wind-up
-        mIntegral -= error * deltaTime;
+        if(error < 0)
+            mIntegral -= error * deltaTime;
     }
 
-    if(mDirection == static_cast<int>(Direction::REVERSE))
-        result = mMax - (result - mMin);
-
-    return result * mDirection;
+    return result ;
 }
 /**
  * @brief Invert the output signal

@@ -102,7 +102,7 @@ auto Logic::fanController() -> byte
     auto d = mHmi->mSettings.fanControl.pid.Kd*factor;
 
     mPID.setTunings(p, i, d, mHmi->mSettings.fanControl.pid.sampletime);
-    return mPID.calc(mHmi->mSettings.fanControl.setpoint, mDhtIndoor->mTemperature);
+    return static_cast<byte>(mPID.calc(mHmi->mSettings.fanControl.setpoint, mDhtIndoor->mTemperature));
 
 }
 /**
